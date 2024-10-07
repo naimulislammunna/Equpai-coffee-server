@@ -9,8 +9,8 @@ require('dotenv').config()
 app.use(cors()); // use when data pass to client site
 app.use(express.json())//use when data recive from client site for format json data
 
-app.get('/', (req, res) =>{
-    res.send('ok server is ok');
+app.get('/', (req, res) => {
+  res.send('ok server is ok');
 })
 // app.get('/add-coffee', (req, res) =>{
 //     res.send('paici mama');
@@ -20,16 +20,16 @@ app.get('/', (req, res) =>{
 //     const result = req.body;
 //     console.log(result);
 //     res.send(result);
-    
+
 // })
 
-app.listen(port, () =>{
-    console.log('port running', port);
-    
+app.listen(port, () => {
+  console.log('port running', port);
+
 })
 
 // for mongodb
- 
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@express-explore.use1c.mongodb.net/?retryWrites=true&w=majority&appName=express-explore`;
 
 
@@ -49,25 +49,32 @@ async function run() {
     const collection = client.db('equpai-coffee').collection('coffee-items');
 
 
-    app.get('/coffee-items', async(req, res) =>{
-        const cursor = collection.find();
-        const result = await cursor.toArray();
-        res.send(result);
-    })
-    
-    app.post('/add-coffee', async(req, res) =>{
-        const result = req.body;
-        console.log(result);
-        const query = await collection.insertOne(result);
-        res.send(query);
+    app.get('/coffee-items', async (req, res) => {
+      const cursor = collection.find();
+      const result = await cursor.toArray();
+      res.send(result);
     })
 
-    app.patch('/update/:id', async (req, res) =>{
+    app.get('/coffee-item/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await collection.findOne(query);
+      res.send(result);
+    })
+
+    app.post('/add-coffee', async (req, res) => {
+      const result = req.body;
+      console.log(result);
+      const query = await collection.insertOne(result);
+      res.send(query);
+    })
+
+    app.patch('/update/:id', async (req, res) => {
       const id = req.params.id;
       const body = req.body;
-      const {name, chef, supplier, teste, category, price} = body;
-      const query = {_id: new ObjectId(id)};
-      const updateDoc ={
+      const { name, chef, supplier, teste, category, price } = body;
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = {
         $set: {
           name,
           chef,
@@ -77,11 +84,17 @@ async function run() {
           price
         }
       }
-      const result = collection.updateOne(query, updateDoc);
+      const result = await collection.updateOne(query, updateDoc);
       res.send(result);
-      
     })
-    
+
+    app.delete('/delete/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await collection.deleteOne(query);
+      res.send(result);
+    })
+
   } finally {
 
   }
