@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express()
 const port = process.env.port || 4000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
 // midleware
@@ -52,7 +52,6 @@ async function run() {
     app.get('/coffee-items', async(req, res) =>{
         const cursor = collection.find();
         const result = await cursor.toArray();
-        console.log("get is well", result);
         res.send(result);
     })
     
@@ -60,8 +59,27 @@ async function run() {
         const result = req.body;
         console.log(result);
         const query = await collection.insertOne(result);
-        console.log(query); 
         res.send(query);
+    })
+
+    app.patch('/update/:id', async (req, res) =>{
+      const id = req.params.id;
+      const body = req.body;
+      const {name, chef, supplier, teste, category, price} = body;
+      const query = {_id: new ObjectId(id)};
+      const updateDoc ={
+        $set: {
+          name,
+          chef,
+          supplier,
+          teste,
+          category,
+          price
+        }
+      }
+      const result = collection.updateOne(query, updateDoc);
+      res.send(result);
+      
     })
     
   } finally {
